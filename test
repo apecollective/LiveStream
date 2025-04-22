@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>BTC Live Chart</title>
+    <style>body { margin: 0; }</style>
+  </head>
+  <body>
+    <iframe
+      src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_btc&symbol=BITSTAMP:BTCUSD&interval=1&theme=dark&style=1&timezone=Etc%2FUTC"
+      width="100%"
+      height="100%"
+      frameborder="0"
+      allowtransparency="true"
+      scrolling="no">
+    </iframe>
+  </body>
+</html>
