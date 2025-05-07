@@ -1,136 +1,160 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>SOLUSDT Live Chart</title>
-    <style>
-      body {
-        margin: 0;
-      }
+<head>
+  <title>SOLUSDT Live Chart</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+    }
 
+    .responsive-widget-container {
+      width: 100%;
+      height: calc(100vh - 30px);
+      max-width: 100%;
+    }
+
+    .tradingview-widget-container,
+    .tradingview-widget-container__widget {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    @media (max-width: 600px) {
       .responsive-widget-container {
-        width: 100%;
-        height: calc(100vh - 30px); /* Initial assumption of ticker height */
-        max-width: 100%;
+        height: calc(100vh - 30px);
       }
+    }
 
-      .tradingview-widget-container,
-      .tradingview-widget-container__widget {
-        width: 100% !important;
-        height: 100% !important;
+    #crypto-ticker-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: black;
+      color: #00FFAA;
+      font-family: sans-serif;
+      font-size: 18px;
+      overflow: hidden;
+      z-index: 9999;
+    }
+
+    .alert-container {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 99999;
+    }
+
+    .crypto-alert {
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+      opacity: 1;
+      transition: all 0.5s ease;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- TradingView Widget -->
+  <div class="responsive-widget-container">
+    <div class="tradingview-widget-container">
+      <div class="tradingview-widget-container__widget"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+      {
+        "autosize": true,
+        "symbol": "BINANCE:SOLUSDT",
+        "interval": "60",
+        "timezone": "America/Chicago",
+        "theme": "dark",
+        "style": "9",
+        "locale": "en",
+        "allow_symbol_change": true,
+        "studies": [
+          "STD;Smoothed%1Moving%1Average",
+          "STD;Stochastic_RSI"
+        ],
+        "support_host": "https://www.tradingview.com"
       }
-
-      @media (max-width: 600px) {
-        .responsive-widget-container {
-          height: calc(100vh - 30px); /* Adjust for smaller screens */
-        }
-      }
-
-      #crypto-ticker-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: black;
-        color: #00FFAA;
-        font-family: sans-serif;
-        font-size: 18px;
-        overflow: hidden;
-        z-index: 9999;
-        white-space: nowrap;
-      }
-
-      .crypto-ticker {
-        display: inline-block;
-        margin-right: 20px;
-      }
-
-      .crypto-ticker span {
-        margin-left: 5px;
-      }
-
-      .up {
-        color: green;
-      }
-
-      .down {
-        color: red;
-      }
-    </style>
-  </head>
-
-  <body>
-    <!-- TradingView Widget -->
-    <div class="responsive-widget-container">
-      <div class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget"></div>
-        <div class="tradingview-widget-copyright">
-          <a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank">
-            <span class="blue-text">Track all markets on TradingView</span>
-          </a>
-        </div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
-        {
-          "autosize": true,
-          "symbol": "BINANCE:SOLUSDT",
-          "interval": "60",
-          "timezone": "America/Chicago",
-          "theme": "dark",
-          "style": "9",
-          "locale": "en",
-          "allow_symbol_change": true,
-          "studies": [
-            "STD;Smoothed%1Moving%1Average",
-            "STD;Stochastic_RSI"
-          ],
-          "support_host": "https://www.tradingview.com"
-        }
-        </script>
-      </div>
+      </script>
     </div>
-    <!-- TradingView Widget End -->
+  </div>
 
-    <!-- Crypto Ticker Bar -->
-    <div id="crypto-ticker-bar">
-      <marquee behavior="scroll" direction="left" scrollamount="3" id="ticker">
-        Loading crypto data...
-      </marquee>
-    </div>
+  <!-- Crypto Ticker Bar -->
+  <div id="crypto-ticker-bar">
+    <marquee behavior="scroll" direction="left" scrollamount="3" id="ticker">
+      Loading crypto news...
+    </marquee>
+  </div>
 
-    <!-- Fetch and Display Crypto Data -->
-    <script>
-      // Function to fetch crypto data
-      async function fetchCryptoData() {
-        try {
-          const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,cardano,ripple,litecoin&order=market_cap_desc&per_page=5&page=1');
-          const data = await response.json();
+  <!-- Crypto News Script -->
+  <script>
+    fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://cryptopanic.com/news/rss/'))
+      .then(response => response.json())
+      .then(data => {
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(data.contents, "text/xml");
+        const items = xml.querySelectorAll("item");
+        const headlines = Array.from(items).map(item => item.querySelector("title").textContent);
+        document.getElementById("ticker").textContent = headlines.join(" ✦ ");
+      });
+  </script>
 
-          const tickerContainer = document.getElementById('ticker');
-          tickerContainer.innerHTML = ''; // Clear existing content
+  <!-- Crypto Alert Container -->
+  <div class="alert-container" id="alert-container"></div>
 
-          data.forEach(coin => {
-            const coinElement = document.createElement('div');
-            coinElement.classList.add('crypto-ticker');
+  <!-- Crypto Price Movement Alert Script -->
+  <script>
+    async function fetchCryptoData() {
+      try {
+        const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&price_change_percentage=24h');
+        const data = await response.json();
 
-            // Set ticker text
-            const price = coin.current_price.toFixed(2);
-            const change = coin.price_change_percentage_24h.toFixed(2);
-            const changeClass = change >= 0 ? 'up' : 'down'; // Green for up, red for down
+        data.forEach(coin => {
+          const change = coin.price_change_percentage_24h;
+          if (Math.abs(change) >= 5) {
+            showAlert(coin.name, change, coin.current_price);
+          }
+        });
 
-            coinElement.innerHTML = `
-              <span>${coin.name} ($${price})</span>
-              <span class="${changeClass}">(${change}%)</span>
-            `;
+      } catch (error) {
+        console.error("Failed to fetch crypto data:", error);
+      }
+    }
 
-            tickerContainer.appendChild(coinElement);
-          });
-        } catch (error) {
-          console.error('Error fetching crypto data:', error);
-        }
+    function showAlert(name, change, price) {
+      const container = document.getElementById('alert-container');
+      const alert = document.createElement('div');
+      alert.className = 'crypto-alert';
+      alert.style.background = change >= 0
+        ? 'rgba(0, 200, 0, 0.8)'
+        : 'rgba(200, 0, 0, 0.8)';
+      alert.textContent = `${name}: $${price.toFixed(2)} (${change.toFixed(2)}%)`;
+      container.appendChild(alert);
+
+      if (container.children.length > 3) {
+        container.removeChild(container.firstChild);
       }
 
-      // Fetch the data when the page loads
-      window.addEventListener('load', fetchCryptoData);
-    </script>
+      setTimeout(() => {
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(20px)';
+      }, 4500);
+      setTimeout(() => {
+        if (alert.parentNode) alert.remove();
+      }, 5000);
+    }
 
-  </body>
+    fetchCryptoData();
+    setInterval(fetchCryptoData, 60000);
+  </script>
+</body>
 </html>
