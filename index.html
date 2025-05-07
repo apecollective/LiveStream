@@ -36,6 +36,24 @@
         font-size: 18px;
         overflow: hidden;
         z-index: 9999;
+        white-space: nowrap;
+      }
+
+      .crypto-ticker {
+        display: inline-block;
+        margin-right: 20px;
+      }
+
+      .crypto-ticker span {
+        margin-left: 5px;
+      }
+
+      .up {
+        color: green;
+      }
+
+      .down {
+        color: red;
       }
     </style>
   </head>
@@ -74,35 +92,45 @@
     <!-- Crypto Ticker Bar -->
     <div id="crypto-ticker-bar">
       <marquee behavior="scroll" direction="left" scrollamount="3" id="ticker">
-        Loading crypto news...
+        Loading crypto data...
       </marquee>
     </div>
 
-    <!-- Crypto Ticker Script -->
+    <!-- Fetch and Display Crypto Data -->
     <script>
-      fetch('https://cors-anywhere.herokuapp.com/' + encodeURIComponent('https://cryptopanic.com/news/rss/'))
-  .then(response => response.json())
-  .then(data => {
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(data.contents, "text/xml");
-    const items = xml.querySelectorAll("item");
+      // Function to fetch crypto data
+      async function fetchCryptoData() {
+        try {
+          const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,cardano,ripple,litecoin&order=market_cap_desc&per_page=5&page=1');
+          const data = await response.json();
 
-    // Log the items to see if they exist
-    console.log(items);
+          const tickerContainer = document.getElementById('ticker');
+          tickerContainer.innerHTML = ''; // Clear existing content
 
-    const headlines = Array.from(items).map(item => item.querySelector("title").textContent);
-    document.getElementById("ticker").textContent = headlines.join(" ✦ ");
-  })
-  .catch(error => console.error("Error fetching crypto news:", error));
+          data.forEach(coin => {
+            const coinElement = document.createElement('div');
+            coinElement.classList.add('crypto-ticker');
+
+            // Set ticker text
+            const price = coin.current_price.toFixed(2);
+            const change = coin.price_change_percentage_24h.toFixed(2);
+            const changeClass = change >= 0 ? 'up' : 'down'; // Green for up, red for down
+
+            coinElement.innerHTML = `
+              <span>${coin.name} ($${price})</span>
+              <span class="${changeClass}">(${change}%)</span>
+            `;
+
+            tickerContainer.appendChild(coinElement);
+          });
+        } catch (error) {
+          console.error('Error fetching crypto data:', error);
+        }
+      }
+
+      // Fetch the data when the page loads
+      window.addEventListener('load', fetchCryptoData);
     </script>
 
-    <!-- Dynamic Height Adjustment Script -->
-    <script>
-      window.addEventListener('load', () => {
-        const tickerHeight = document.getElementById('crypto-ticker-bar').offsetHeight;
-        const chartContainer = document.querySelector('.responsive-widget-container');
-        chartContainer.style.height = `calc(100vh - ${tickerHeight}px)`;
-      });
-    </script>
   </body>
 </html>
