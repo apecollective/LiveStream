@@ -80,15 +80,20 @@
 
     <!-- Crypto Ticker Script -->
     <script>
-      fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://cryptopanic.com/news/rss/'))
-        .then(response => response.json())
-        .then(data => {
-          const parser = new DOMParser();
-          const xml = parser.parseFromString(data.contents, "text/xml");
-          const items = xml.querySelectorAll("item");
-          const headlines = Array.from(items).map(item => item.querySelector("title").textContent);
-          document.getElementById("ticker").textContent = headlines.join(" ✦ ");
-        });
+      fetch('https://cors-anywhere.herokuapp.com/' + encodeURIComponent('https://cryptopanic.com/news/rss/'))
+  .then(response => response.json())
+  .then(data => {
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(data.contents, "text/xml");
+    const items = xml.querySelectorAll("item");
+
+    // Log the items to see if they exist
+    console.log(items);
+
+    const headlines = Array.from(items).map(item => item.querySelector("title").textContent);
+    document.getElementById("ticker").textContent = headlines.join(" ✦ ");
+  })
+  .catch(error => console.error("Error fetching crypto news:", error));
     </script>
 
     <!-- Dynamic Height Adjustment Script -->
